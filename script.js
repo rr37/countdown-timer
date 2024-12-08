@@ -109,6 +109,12 @@ function resetCountdown() {
   document.body.style.backgroundColor = '#ffffff'; // 恢復原背景色
 }
 
+// 重設上次倒數
+function resetPreviousCountdown() {
+  timeRemaining = lastTimeRemaining;
+  resetCountdown();
+}
+
 // 更新切換背景時間
 function updateAlertTime() {
   alertTime = parseInt(document.getElementById('alert-time').value);

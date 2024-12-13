@@ -3,7 +3,7 @@
 
 立即試用：https://rr37.github.io/countdown-timer/
 
-![alt text](<demo gif/feature_demo.gif>) 
+![feature_demo](<demo gif/feature_demo.gif>) 
 > 範例說明
 >
 > - 開始倒數，底色變為淺綠色
@@ -15,14 +15,21 @@
 - 選擇配置
 - 按下開始
 
-![alt text](<demo gif/default_setting.gif>)
+![default_setting](<demo gif/default_setting.gif>)
 ### 使用「自訂倒數與提醒時間」
 - 輸入「配置名稱」、「倒數時間 (分鐘)」、「提醒時間 (分鐘)」
 - 選擇配置
 - 按下開始
 
-![alt text](<demo gif/costom_setting.gif>)
+![costom_setting](<demo gif/costom_setting.gif>)
 ### 使用「響鈴」
 - 按下響鈴，即會發出鈴聲，連續點擊，可連續發出鈴聲
 
-![alt text](<demo gif/bell.gif>)
+![bell](<demo gif/bell.gif>)
+
+## 如何使用
+### 正計時
+- 開啟正計時，則會在倒數結束時顯示「已超時」並繼續計時，且之後每 1 分鐘都會響鈴 3 聲
+
+
+![overtime](<demo gif/overtime.gif>)

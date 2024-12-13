@@ -4,6 +4,9 @@ let timeRemaining = 3; // 預設 5 分鐘
 let isPaused = false;
 let isCounting = false; // 用來追蹤倒數是否進行中
 let alertTime = 1 / 30; // 分鐘
+let isOvertime = false;
+let isCountingOvertime = false;
+let overtimeInterval = null;
 // 初始化已保存的配置
 let customConfigs = [
   { name: '講者', time: 20, alert: 2 },
@@ -35,24 +38,42 @@ function handleCountdownEnd() {
   clearInterval(countdownInterval);
   countdownInterval = null;
   isCounting = false;
+
   const startPauseButton = document.getElementById('start-pause-button');
-  const bigNumber = document.querySelector('.big-number');
   startPauseButton.textContent = '重新開始'; // 改變按鈕顯示文字
   startPauseButton.classList.remove('btn-danger'); // 移除暫停時的 class
   startPauseButton.classList.add('btn-primary'); // 添加新的 class
   document.body.style.backgroundColor = '#ff7e7e'; // 切換到紅色背景
-  bigNumber.style.height = '60vh';
+
   console.log('倒數完成，時間到！');
   playBell(); // 播放鈴聲
+
+  // 檢查正計時是否開啟
+  if (isOvertime) {
+    // 如果按下了正計時按鈕，啟動正計時
+    startOvertime();
+  } else {
+    console.log('正計時按鈕未按下，不啟動正計時');
+  }
+
+  adjustBigNumberHeight();
+}
+
+function adjustBigNumberHeight() {
+  const bigNumber = document.querySelector('.big-number');
+  if (isCounting || isCountingOvertime) {
+    bigNumber.style.height = '85vh';
+  } else {
+    bigNumber.style.height = '60vh';
+  }
 }
 
 function toggleCountdown() {
   const startPauseButton = document.getElementById('start-pause-button');
-  const bigNumber = document.querySelector('.big-number');
-  console.log(bigNumber);
   console.log(timeRemaining);
   if (startPauseButton.textContent === '重新開始') {
     timeRemaining = lastTimeRemaining;
+    stopOvertime();
     updateCountdownDisplay();
   }
   if (timeRemaining === 0) {
@@ -69,6 +90,7 @@ function toggleCountdown() {
     startPauseButton.classList.remove('btn-danger'); // 移除暫停時的 class
     startPauseButton.classList.add('btn-primary'); // 添加新的 class
     document.body.style.backgroundColor = '#ffffff'; // 還原背景顏色
+    adjustBigNumberHeight();
   } else {
     // 開始倒數
     countdownInterval = setInterval(() => {
@@ -84,35 +106,98 @@ function toggleCountdown() {
         handleCountdownEnd(); // 時間到，呼叫結束處理邏輯
       }
     }, 1000);
-    bigNumber.style.height = '85vh';
     startPauseButton.textContent = '暫停'; // 改變按鈕顯示文字
     startPauseButton.classList.remove('btn-primary'); // 移除預設的 class
     startPauseButton.classList.add('btn-danger'); // 添加新的 class
     document.body.style.backgroundColor = '#b5e6b7'; // 開始倒數時，顯示新的背景顏色
     isCounting = true; // 更新狀態
+    adjustBigNumberHeight();
   }
 }
 
+// 切換正計時
+function toggleOvertime() {
+  const overtimeButton = document.getElementById('overtime-button');
+
+  if (isOvertime) {
+    isOvertime = false;
+    overtimeButton.textContent = '正計時已關閉';
+    console.log(isOvertime);
+  } else {
+    isOvertime = true;
+    overtimeButton.textContent = '正計時已開啟';
+    console.log(isOvertime);
+  }
+}
+
+function startOvertime() {
+  if (isCounting) {
+    console.log('還在倒數啦！');
+    return;
+  }
+  const countdownElement = document.getElementById('countdown');
+  // 啟動正計時
+  isCountingOvertime = true;
+  let overtime = 0;
+  overtimeInterval = setInterval(() => {
+    overtime++;
+    countdownElement.textContent = `已超時${Math.floor(overtime / 60)
+      .toString()
+      .padStart(2, '0')}:${(overtime % 60).toString().padStart(2, '0')}`;
+
+    // 每超時 1 分鐘響鈴 3 次
+    if (overtime % 60 === 0) {
+      playBell(3); // 播放鈴聲 3 次
+    }
+  }, 1000);
+
+  document.body.style.backgroundColor = '#000000'; // 切換為黑色背景
+  countdownElement.style.color = 'red'; // 數字變紅
+}
+
+function stopOvertime() {
+  const countdownElement = document.getElementById('countdown');
+  // 關閉正計時
+  clearInterval(overtimeInterval);
+  overtimeInterval = null;
+  isCountingOvertime = false;
+  document.body.style.backgroundColor = '#ffffff'; // 恢復背景顏色
+  countdownElement.style.color = ''; // 恢復文字顏色
+}
+
 // 播放鈴聲
-function playBell() {
+function playBell(times = 1) {
   const bell = new Audio('bell.mp3');
-  bell.play();
+  let count = 0;
+
+  function play() {
+    if (count < times) {
+      bell.currentTime = 0; // 確保從頭播放
+      bell.play();
+      count++;
+      setTimeout(play, 500); // 每半秒播放一次
+    }
+  }
+
+  play();
 }
 
 // 重設倒數
 function resetCountdown() {
+  stopOvertime();
   clearInterval(countdownInterval);
   countdownInterval = null;
   isCounting = false; // 確保倒數停止
   document.getElementById('start-pause-button').textContent = '開始'; // 重置按鈕文字
-  updateCountdownDisplay();
   document.body.style.backgroundColor = '#ffffff'; // 恢復原背景色
+  updateCountdownDisplay();
 }
 
 // 重設上次倒數
 function resetPreviousCountdown() {
   timeRemaining = lastTimeRemaining;
   resetCountdown();
+  adjustBigNumberHeight();
 }
 
 // 更新切換背景時間
